@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HotelReservation.Adapter.Persistence/HotelReservation.Adapter.Persistence.csproj" />
+    <Project Path="src/HotelReservation.Adapter.WebApi/HotelReservation.Adapter.WebApi.csproj" />
+    <Project Path="src/HotelReservation.Bootstrapper/HotelReservation.Bootstrapper.csproj" />
+    <Project Path="src/HotelReservation.Core/HotelReservation.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HotelReservation.Core.Tests/HotelReservation.Core.Tests.csproj" />
+    <Project Path="tests/HotelReservation.Integration.Tests/HotelReservation.Integration.Tests.csproj" />
+    <Project Path="tests/HotelReservation.UseCases.Tests/HotelReservation.UseCases.Tests.csproj" />
+  </Folder>
+</Solution>
