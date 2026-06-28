@@ -6,6 +6,8 @@ namespace HotelReservation.Core.Domain.Reservations;
 
 public sealed class Reservation
 {
+    private readonly List<IDomainEvent> _domainEvents = [];
+
     private Reservation(
         ReservationId id,
         RoomId roomId,
@@ -33,6 +35,8 @@ public sealed class Reservation
 
     public DateTimeOffset CreatedAt { get; }
 
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+
     public static Reservation Create(
         ReservationId id,
         RoomId roomId,
@@ -40,7 +44,9 @@ public sealed class Reservation
         DateRange period,
         DateTimeOffset createdAt)
     {
-        return new Reservation(id, roomId, guestInfo, period, createdAt);
+        var reservation = new Reservation(id, roomId, guestInfo, period, createdAt);
+        reservation.AddDomainEvent(new ReservationCreatedEvent(id, roomId, period, createdAt));
+        return reservation;
     }
 
     public void Confirm()
@@ -51,6 +57,7 @@ public sealed class Reservation
         }
 
         Status = ReservationStatus.Confirmed;
+        AddDomainEvent(new ReservationConfirmedEvent(Id, DateTimeOffset.UtcNow));
     }
 
     public void Cancel()
@@ -61,5 +68,16 @@ public sealed class Reservation
         }
 
         Status = ReservationStatus.Cancelled;
+        AddDomainEvent(new ReservationCancelledEvent(Id, DateTimeOffset.UtcNow));
+    }
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+
+    private void AddDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
     }
 }

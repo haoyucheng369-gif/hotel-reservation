@@ -27,9 +27,29 @@ public class ReservationTests
     }
 
     [Fact]
+    public void Create_ShouldRaiseReservationCreatedEvent()
+    {
+        var reservationId = new ReservationId(Guid.NewGuid());
+        var roomId = new RoomId(Guid.NewGuid());
+        var guestInfo = CreateGuestInfo();
+        var period = CreatePeriod();
+        var createdAt = new DateTimeOffset(2026, 7, 1, 10, 0, 0, TimeSpan.Zero);
+
+        var reservation = Reservation.Create(reservationId, roomId, guestInfo, period, createdAt);
+
+        var domainEvent = Assert.IsType<ReservationCreatedEvent>(
+            Assert.Single(reservation.DomainEvents));
+        Assert.Equal(reservationId, domainEvent.ReservationId);
+        Assert.Equal(roomId, domainEvent.RoomId);
+        Assert.Equal(period, domainEvent.Period);
+        Assert.Equal(createdAt, domainEvent.OccurredAt);
+    }
+
+    [Fact]
     public void Confirm_ShouldSetStatusToConfirmed_WhenReservationIsPending()
     {
         var reservation = CreateReservation();
+        reservation.ClearDomainEvents();
 
         reservation.Confirm();
 
@@ -37,9 +57,23 @@ public class ReservationTests
     }
 
     [Fact]
+    public void Confirm_ShouldRaiseReservationConfirmedEvent()
+    {
+        var reservation = CreateReservation();
+        reservation.ClearDomainEvents();
+
+        reservation.Confirm();
+
+        var domainEvent = Assert.IsType<ReservationConfirmedEvent>(
+            Assert.Single(reservation.DomainEvents));
+        Assert.Equal(reservation.Id, domainEvent.ReservationId);
+    }
+
+    [Fact]
     public void Cancel_ShouldSetStatusToCancelled_WhenReservationIsPending()
     {
         var reservation = CreateReservation();
+        reservation.ClearDomainEvents();
 
         reservation.Cancel();
 
@@ -47,10 +81,24 @@ public class ReservationTests
     }
 
     [Fact]
+    public void Cancel_ShouldRaiseReservationCancelledEvent()
+    {
+        var reservation = CreateReservation();
+        reservation.ClearDomainEvents();
+
+        reservation.Cancel();
+
+        var domainEvent = Assert.IsType<ReservationCancelledEvent>(
+            Assert.Single(reservation.DomainEvents));
+        Assert.Equal(reservation.Id, domainEvent.ReservationId);
+    }
+
+    [Fact]
     public void Cancel_ShouldSetStatusToCancelled_WhenReservationIsConfirmed()
     {
         var reservation = CreateReservation();
         reservation.Confirm();
+        reservation.ClearDomainEvents();
 
         reservation.Cancel();
 
