@@ -1,3 +1,4 @@
+using HotelReservation.Adapter.Persistence;
 using HotelReservation.Core;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,8 +10,10 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
         {
-            configuration.RegisterServicesFromAssemblyContaining<AssemblyMarker>();
+            configuration.RegisterServicesFromAssemblyContaining<HotelReservation.Core.AssemblyMarker>();
         });
+
+        services.AddPersistenceAdapter();
 
         return services;
     }
