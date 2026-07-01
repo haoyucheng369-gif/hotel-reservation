@@ -70,6 +70,61 @@ public sealed class ReservationsApiTests : IClassFixture<WebApplicationFactory<P
         Assert.Contains(availableRoomsAfterCancel, room => room.Id == Room101Id);
     }
 
+    [Fact]
+    public async Task CreateReservation_WhenRoomDoesNotExist_ShouldReturnNotFound()
+    {
+        var request = new CreateReservationRequest(
+            Guid.Parse("99999999-9999-9999-9999-999999999999"),
+            "Grace",
+            "Hopper",
+            "grace.hopper@example.com",
+            new DateOnly(2026, 9, 1),
+            new DateOnly(2026, 9, 5));
+
+        var response = await _client.PostAsJsonAsync("/reservations", request);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateReservation_WhenRoomAlreadyBooked_ShouldReturnConflict()
+    {
+        var request = new CreateReservationRequest(
+            Room101Id,
+            "Katherine",
+            "Johnson",
+            "katherine.johnson@example.com",
+            new DateOnly(2026, 10, 1),
+            new DateOnly(2026, 10, 5));
+
+        var firstResponse = await _client.PostAsJsonAsync("/reservations", request);
+        Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
+
+        var secondResponse = await _client.PostAsJsonAsync("/reservations", request);
+
+        Assert.Equal(HttpStatusCode.Conflict, secondResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task ConfirmReservation_WhenReservationDoesNotExist_ShouldReturnNotFound()
+    {
+        var response = await _client.PostAsync(
+            "/reservations/99999999-9999-9999-9999-999999999999/confirm",
+            content: null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CancelReservation_WhenReservationDoesNotExist_ShouldReturnNotFound()
+    {
+        var response = await _client.PostAsync(
+            "/reservations/99999999-9999-9999-9999-999999999999/cancel",
+            content: null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private async Task<IReadOnlyList<AvailableRoomResponse>> GetAvailableRoomsAsync(
         DateOnly checkIn,
         DateOnly checkOut)
